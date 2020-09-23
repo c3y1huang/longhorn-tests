@@ -40,10 +40,14 @@ PORT = ":9500"
 
 RETRY_COMMAND_COUNT = 3
 RETRY_COUNTS = 300
+RETRY_COUNTS_LONG = 1200
 RETRY_INTERVAL = 0.5
 RETRY_INTERVAL_LONG = 2
 RETRY_BACKUP_COUNTS = 300
+RETRY_BACKUP_COUNTS_LONG = 600
 RETRY_BACKUP_INTERVAL = 1
+RETRY_POD_COUNT = 600
+RETRY_POD_INTERVAL = 1
 RETRY_EXEC_COUNTS = 30
 RETRY_EXEC_INTERVAL = 5
 
@@ -1310,6 +1314,7 @@ def wait_for_volume_creation(client, name):
                 break
         if found:
             break
+        time.sleep(RETRY_INTERVAL)
     assert found
 
 
@@ -1376,9 +1381,9 @@ def wait_for_volume_faulted(client, name):
 
 def wait_for_volume_status(client, name, key, value):
     wait_for_volume_creation(client, name)
-    for i in range(RETRY_COUNTS):
+    for i in range(RETRY_COUNTS_LONG):
         volume = client.by_id_volume(name)
-        if volume[key] == value:
+        if volume is not None and volume[key] == value:
             break
         time.sleep(RETRY_INTERVAL)
     assert volume[key] == value
@@ -1514,11 +1519,12 @@ def wait_for_engine_image_creation(client, image_name):
         images = client.list_engine_image()
         found = False
         for img in images:
-            if img.name == image_name:
+            if img.name == image_name and img.state != "deploying":
                 found = True
                 break
         if found:
             break
+        time.sleep(RETRY_INTERVAL)
     assert found
 
 
@@ -2052,7 +2058,7 @@ def wait_for_node_update(client, name, key, value):
 
 
 def wait_for_disk_update(client, name, disk_num):
-    for i in range(RETRY_COUNTS):
+    for i in range(RETRY_COUNTS_LONG):
         node = client.by_id_node(name)
         if len(node.disks) == disk_num:
             allUpdated = True
@@ -2132,10 +2138,13 @@ def get_volume_attached_nodes(v):
 
 
 def wait_for_backup_completion(client, volume_name, snapshot_name,
-                               retry_count=RETRY_BACKUP_COUNTS):
+                               retry_counts=RETRY_BACKUP_COUNTS):
     completed = False
-    for i in range(retry_count):
+    for i in range(retry_counts):
         v = client.by_id_volume(volume_name)
+        if v is None:
+            time.sleep(RETRY_BACKUP_INTERVAL)
+            continue
         for b in v.backupStatus:
             if b.snapshot == snapshot_name and b.state == "complete":
                 assert b.progress == 100
@@ -2882,7 +2891,7 @@ def activate_standby_volume(client, volume_name,
                             frontend=VOLUME_FRONTEND_BLOCKDEV):
     volume = client.by_id_volume(volume_name)
     assert volume.standby is True
-    for i in range(RETRY_COUNTS):
+    for i in range(RETRY_COUNTS_LONG):
         volume = client.by_id_volume(volume_name)
         engines = volume.controllers
         if len(engines) != 1 or \
@@ -3593,7 +3602,7 @@ def wait_for_pod_restart(core_api, pod_name, namespace="default"):
     restart_count = pod.status.container_statuses[0].restart_count
 
     pod_restarted = False
-    for i in range(RETRY_COUNTS):
+    for i in range(RETRY_POD_COUNT):
         pod = core_api.read_namespaced_pod(name=pod_name,
                                            namespace=namespace)
         count = pod.status.container_statuses[0].restart_count
@@ -3601,7 +3610,7 @@ def wait_for_pod_restart(core_api, pod_name, namespace="default"):
             pod_restarted = True
             break
 
-        time.sleep(RETRY_INTERVAL)
+        time.sleep(RETRY_POD_INTERVAL)
     assert pod_restarted
 
 

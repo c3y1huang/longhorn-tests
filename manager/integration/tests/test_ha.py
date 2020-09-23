@@ -50,6 +50,7 @@ from common import wait_for_volume_healthy_no_frontend
 from common import exec_instance_manager
 from common import SIZE, VOLUME_RWTEST_SIZE, EXPAND_SIZE, Gi
 from common import RETRY_COUNTS, RETRY_INTERVAL
+from common import RETRY_BACKUP_COUNTS_LONG
 from common import SETTING_REPLICA_NODE_SOFT_ANTI_AFFINITY
 from common import write_pod_volume_data
 from common import read_volume_data
@@ -719,7 +720,8 @@ def test_rebuild_with_restoration(
     original_volume = client.by_id_volume(original_volume_name)
     snap = create_snapshot(client, original_volume_name)
     original_volume.snapshotBackup(name=snap.name)
-    wait_for_backup_completion(client, original_volume_name, snap.name)
+    wait_for_backup_completion(client, original_volume_name, snap.name,
+                               RETRY_BACKUP_COUNTS_LONG)
     bv, b = find_backup(client, original_volume_name, snap.name)
 
     restore_volume_name = volume_name + "-restore"
@@ -948,7 +950,8 @@ def test_inc_restoration_with_multiple_rebuild_and_expansion(
     std_volume = client.by_id_volume(std_volume_name)
     snap1 = create_snapshot(client, std_volume_name)
     std_volume.snapshotBackup(name=snap1.name)
-    wait_for_backup_completion(client, std_volume_name, snap1.name)
+    wait_for_backup_completion(client, std_volume_name, snap1.name,
+                               RETRY_BACKUP_COUNTS_LONG)
     bv, b1 = find_backup(client, std_volume_name, snap1.name)
 
     # Create the DR volume
@@ -994,7 +997,7 @@ def test_inc_restoration_with_multiple_rebuild_and_expansion(
     std_volume = client.by_id_volume(std_volume_name)
     std_volume.snapshotBackup(name=snap2.name)
     wait_for_backup_completion(client, std_volume_name, snap2.name,
-                               retry_count=600)
+                               RETRY_BACKUP_COUNTS_LONG)
     bv, b2 = find_backup(client, std_volume_name, snap2.name)
 
     # Trigger rebuild and the incremental restoration
@@ -1665,7 +1668,7 @@ def test_engine_crash_for_restore_volume(
     snap = create_snapshot(client, volume_name)
     volume.snapshotBackup(name=snap.name)
     wait_for_backup_completion(client, volume_name, snap.name,
-                               retry_count=600)
+                               RETRY_BACKUP_COUNTS_LONG)
     bv, b = find_backup(client, volume_name, snap.name)
 
     res_name = "res-" + volume_name
@@ -1679,6 +1682,8 @@ def test_engine_crash_for_restore_volume(
     # Check if the restore volume is auto reattached then continue
     # restoring data.
     crash_engine_process_with_sigkill(client, core_api, res_name)
+
+    # this line may fail if the recovery is too quick
     wait_for_volume_detached(client, res_name)
 
     res_volume = wait_for_volume_healthy_no_frontend(client, res_name)
@@ -1707,9 +1712,19 @@ def test_engine_crash_for_restore_volume(
     res_pod['spec']['volumes'] = [create_pvc_spec(pvc_name)]
     create_and_wait_pod(core_api, res_pod)
 
-    res_volume = client.by_id_volume(res_name)
-    assert res_volume[VOLUME_FIELD_ROBUSTNESS] == \
-           VOLUME_ROBUSTNESS_HEALTHY
+    wait_for_volume_healthy(client, res_name)
+    wait_for_pod_remount(core_api, res_pod_name)
+    # vol_bound = False
+    # for i in range(RETRY_COUNTS):
+    #     pvc_status = core_api.read_namespaced_persistent_volume_claim_status(
+    #         name=pvc_name,
+    #         namespace='default'
+    #     )
+    #     if pvc_status.status.phase == 'Bound':
+    #         vol_bound = True
+    #         break
+    #     time.sleep(RETRY_INTERVAL)
+    # assert vol_bound
 
     res_md5sum = get_pod_data_md5sum(core_api, res_pod_name, data_path)
     assert md5sum == res_md5sum
@@ -1778,13 +1793,16 @@ def test_engine_crash_for_dr_volume(
     snap2 = create_snapshot(client, volume_name)
     volume = client.by_id_volume(volume_name)
     volume.snapshotBackup(name=snap2.name)
-    wait_for_backup_completion(client, volume_name, snap2.name)
+    wait_for_backup_completion(client, volume_name, snap2.name,
+                               RETRY_BACKUP_COUNTS_LONG)
     bv, b2 = find_backup(client, volume_name, snap2.name)
 
     # Trigger the inc restore then crash the engine process immediately.
     client.list_backupVolume()
     wait_for_volume_restoration_start(client, dr_volume_name, b2.name)
     crash_engine_process_with_sigkill(client, core_api, dr_volume_name)
+
+    # this line may fail if the recovery is too quick
     wait_for_volume_detached(client, dr_volume_name)
 
     # Check if the DR volume is auto reattached then continue

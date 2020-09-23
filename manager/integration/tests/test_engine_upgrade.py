@@ -635,7 +635,7 @@ def test_engine_live_upgrade_with_intensive_data_writing(client, core_api, volum
     pod['spec']['volumes'] = [create_pvc_spec(pvc_name)]
     create_and_wait_pod(core_api, pod)
 
-    volume = client.by_id_volume(volume_name)
+    volume = common.wait_for_volume_healthy(client, volume_name)
     assert volume.engineImage == original_engine_image
     assert volume.currentImage == original_engine_image
     engine = get_volume_engine(volume)
@@ -685,8 +685,11 @@ def test_engine_live_upgrade_with_intensive_data_writing(client, core_api, volum
 
     # The reattached volume should be state `healthy` rather than`degraded`.
     create_and_wait_pod(core_api, pod)
-    volume = client.by_id_volume(volume_name)
-    assert volume.robustness == "healthy"
+    common.wait_for_volume_status(
+        client, volume_name,
+        common.VOLUME_FIELD_ROBUSTNESS,
+        common.VOLUME_ROBUSTNESS_HEALTHY
+    )
 
     volume_file_md5sum1 = get_pod_data_md5sum(
         core_api, pod_name, data_path1)
@@ -694,6 +697,9 @@ def test_engine_live_upgrade_with_intensive_data_writing(client, core_api, volum
     volume_file_md5sum2 = get_pod_data_md5sum(
         core_api, pod_name, data_path2)
     assert volume_file_md5sum2 == original_md5sum2
+
+    client.delete(volume)
+    wait_for_volume_delete(client, volume_name)
 
     delete_and_wait_pod(core_api, pod_name)
     delete_and_wait_pvc(core_api, pvc_name)
