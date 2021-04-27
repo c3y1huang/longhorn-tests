@@ -5,7 +5,7 @@ import subprocess
 import pytest
 
 from common import client, random_labels, volume_name  # NOQA
-from common import core_api, apps_api, pod   # NOQA
+from common import core_api, apps_api, pod, statefulset   # NOQA
 from common import SIZE, EXPAND_SIZE
 from common import check_device_data, write_device_random_data
 from common import check_volume_data, write_volume_random_data
@@ -83,6 +83,8 @@ from backupstore import set_random_backupstore # NOQA
 from backupstore import backupstore_get_backup_volume_prefix
 from backupstore import backupstore_wait_for_lock_expiration
 
+from kubernetes import client as k8sclient
+from kubernetes.client.rest import ApiException
 
 
 @pytest.mark.coretest   # NOQA
@@ -3324,8 +3326,8 @@ def test_allow_volume_creation_with_degraded_availability_error(
     check_volume_data(volume, data)
 
 
-@pytest.mark.skip(reason="TODO") # NOQA
-def test_multiple_volumes_creation_with_degraded_availability():
+def test_multiple_volumes_creation_with_degraded_availability(
+    set_random_backupstore, client, core_api, apps_api, storage_class, statefulset):  # NOQA
     """
     Goal:
     We want to verify that multiple volumes with degraded availability
@@ -3333,19 +3335,64 @@ def test_multiple_volumes_creation_with_degraded_availability():
     same time.
 
     Steps:
-    1. create StorageClass longhorn-extra with numberOfReplicas=5
-       Set allow-volume-creation-with-degraded-availability to True
-    2. Deploy this StatefulSet:
+    1. create new StorageClass with numberOfReplicas=5.
+    2. Set allow-volume-creation-with-degraded-availability to True.
+    3. Deploy this StatefulSet:
        https://github.com/longhorn/longhorn/issues/2073#issuecomment-742948726
-    3. In a 1-min retry loop, Verify that all 10 volumes are healthy
-    4. Delete the StatefulSet
-    5. In a 1-min retry loop, Verify that all 10 volumes are detached
-    6. Find and delete the PVC of the 10 volumes.
-    7. In a 1-min retry loop, Verify that all 10 volumes are deleted
-    8. Make sure to delete all extra storage classes in
-       common.cleanup_client()
+    4. In a 1-min retry loop, Verify that all 10 volumes are healthy.
+    5. Delete the StatefulSet.
+    6. In a 1-min retry loop, Verify that all 10 volumes are detached.
+    7. Find and delete the PVC of the 10 volumes.
+    8. In a 1-min retry loop, Verify that all 10 volumes are deleted.
+    9. Make sure to delete all extra storage classes in
+       common.cleanup_client().
     """
-    pass
+    storage_class['parameters']['numberOfReplicas'] = "5"
+    create_storage_class(storage_class)
+
+    setting = client.by_id_setting(common.SETTING_DEGRADED_AVAILABILITY)
+    client.update(setting, value="true")
+
+    sts_spec = statefulset['spec']
+    sts_spec['podManagementPolicy'] = "Parallel"
+    sts_spec['replicas'] = 10
+    sts_spec['volumeClaimTemplates'][0]['spec']['storageClassName'] = \
+        storage_class['metadata']['name']
+    common.create_statefulset(statefulset)
+
+    retry_count = int(60 / RETRY_INTERVAL)
+    for _ in range(common.DEFAULT_STATEFULSET_TIMEOUT):
+        try:
+            pod_list = common.get_statefulset_pod_info(core_api, statefulset)
+            break
+        except ApiException as e:
+            assert e.status == 404
+            common.DEFAULT_STATEFULSET_INTERVAL
+    assert len(pod_list) == sts_spec['replicas']
+
+    common.wait_for_statefulset_volume_state(client, statefulset, pod_list,
+                                             common.VOLUME_FIELD_ROBUSTNESS,
+                                             common.VOLUME_ROBUSTNESS_HEALTHY,
+                                             retry_counts=retry_count)
+
+    apps_api.delete_namespaced_stateful_set(
+        name=statefulset['metadata']['name'],
+        namespace=statefulset['metadata']['namespace'],
+        body=k8sclient.V1DeleteOptions()
+    )
+
+    common.wait_for_statefulset_volume_state(client, statefulset, pod_list,
+                                             common.VOLUME_FIELD_STATE,
+                                             common.VOLUME_STATE_DETACHED,
+                                             retry_counts=retry_count)
+
+    for p in pod_list:
+        core_api.delete_namespaced_persistent_volume_claim(
+            name=p['pvc_name'], namespace='default',
+            body=k8sclient.V1DeleteOptions())
+
+    common.wait_for_statefulset_volume_delete(client, statefulset, pod_list,
+                                              retry_counts=retry_count)
 
 
 def test_allow_volume_creation_with_degraded_availability_restore(

@@ -1069,7 +1069,8 @@ def statefulset(request):
         'apiVersion': 'apps/v1',
         'kind': 'StatefulSet',
         'metadata': {
-            'name': 'test-statefulset'
+            'name': 'test-statefulset',
+            'namespace': 'default',
         },
         'spec': {
             'selector': {
@@ -2832,6 +2833,16 @@ def check_csi_expansion(core_api):
     return csi_expansion_enabled
 
 
+def create_statefulset(statefulset_manifest):
+    """
+    Create a new StatefulSet for testing.
+    """
+    api = get_apps_api_client()
+    api.create_namespaced_stateful_set(
+        body=statefulset_manifest,
+        namespace='default')
+
+
 def create_and_wait_statefulset(statefulset_manifest):
     """
     Create a new StatefulSet for testing.
@@ -2839,10 +2850,7 @@ def create_and_wait_statefulset(statefulset_manifest):
     This function will block until all replicas in the StatefulSet are online
     or it times out, whichever occurs first.
     """
-    api = get_apps_api_client()
-    api.create_namespaced_stateful_set(
-        body=statefulset_manifest,
-        namespace='default')
+    create_statefulset(statefulset_manifest)
     wait_statefulset(statefulset_manifest)
 
 
@@ -2857,6 +2865,34 @@ def wait_statefulset(statefulset_manifest):
             break
         time.sleep(DEFAULT_STATEFULSET_INTERVAL)
     assert s_set.status.ready_replicas == replicas
+
+
+def wait_for_statefulset_volume_state(client, manifest, pod_list, field, value,  # NOQA
+                                      retry_counts=RETRY_COUNTS):
+    for _ in range(retry_counts):
+        sts_volumes = []
+        volumes = client.list_volume()
+        for v in volumes:
+            for p in pod_list:
+                if v.name == p['pv_name'] and v[field] == value:
+                    sts_volumes = sts_volumes.append(v.name)
+                    break
+        time.sleep(RETRY_INTERVAL)
+    return sts_volumes == len(pod_list)
+
+
+def wait_for_statefulset_volume_delete(client, manifest, pod_list,  # NOQA
+                                       retry_counts=RETRY_COUNTS):
+    for _ in range(retry_counts):
+        deleted = True
+        volumes = client.list_volume()
+        for v in volumes:
+            for p in pod_list:
+                if v.name == p['pv_name']:
+                    deleted = False
+                    break
+        time.sleep(RETRY_INTERVAL)
+    assert deleted is True
 
 
 def create_storage_class(sc_manifest):
