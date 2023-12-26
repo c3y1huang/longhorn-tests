@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.8.4" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>tests.test_kubernetes API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
 <style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
 <script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
 </head>
 <body>
@@ -34,8 +34,8 @@ from common import csi_pv, pvc, pod  # NOQA
 from common import generate_volume_name, get_apps_api_client
 from common import create_and_wait_statefulset
 from common import update_statefulset_manifests
-from common import create_storage_class, delete_storage_class, \
-    find_backup
+from common import create_storage_class, delete_storage_class
+from common import wait_for_backup_completion, find_backup
 from common import get_self_host_id, get_statefulset_pod_info
 from common import create_and_wait_pod
 from common import delete_and_wait_pod, wait_delete_pod
@@ -51,14 +51,20 @@ from common import SIZE
 from common import KUBERNETES_STATUS_LABEL, SETTING_DEFAULT_LONGHORN_STATIC_SC
 from common import DEFAULT_LONGHORN_STATIC_STORAGECLASS_NAME
 from common import create_snapshot
-from common import set_random_backupstore, delete_backup
+from common import delete_backup
 from common import create_and_check_volume, create_pvc, \
     wait_and_get_pv_for_pvc, wait_delete_pvc
 from common import volume_name # NOQA
+from common import update_setting
+from common import SETTING_DEGRADED_AVAILABILITY
+from common import wait_statefulset, crash_engine_process_with_sigkill
+
 from backupstore import backupstore_cleanup
 
 from kubernetes import client as k8sclient
 from kubernetes.client.rest import ApiException
+
+from backupstore import set_random_backupstore  # NOQA
 
 from json import loads
 
@@ -92,7 +98,7 @@ def delete_and_wait_statefulset_only(api, ss):
     assert not found
 
     for p in pod_data:
-        wait_delete_pod(api, p[&#39;pod_name&#39;])
+        wait_delete_pod(api, p[&#39;pod_uid&#39;])
 
 
 def provision_and_wait_pv(client, core_api, storage_class, pvc): # NOQA
@@ -253,24 +259,8 @@ def test_kubernetes_status(client, core_api, storage_class,  # NOQA
         ks_list[i][&#39;lastPVCRefAt&#39;] = &#39;&#39;
         if i == 0:
             ks_list[i][&#39;lastPodRefAt&#39;] = &#39;not empty&#39;
-            ks_list[i][&#39;workloadsStatus&#39;] = [
-                {
-                    &#39;podName&#39;: p[&#39;pod_name&#39;],
-                    &#39;podStatus&#39;: &#39;Running&#39;,
-                    &#39;workloadName&#39;: statefulset_name,
-                    &#39;workloadType&#39;: &#39;StatefulSet&#39;,
-                },
-            ]
         if i == 1:
             ks_list[i][&#39;lastPodRefAt&#39;] = &#39;&#39;
-            ks_list[i][&#39;workloadsStatus&#39;] = [
-                {
-                    &#39;podName&#39;: extra_pod_name,
-                    &#39;podStatus&#39;: &#39;Running&#39;,
-                    &#39;workloadName&#39;: &#39;&#39;,
-                    &#39;workloadType&#39;: &#39;&#39;,
-                }
-            ]
         wait_volume_kubernetes_status(client, volume_name, ks_list[i])
 
     # deleted extra_pod, all volumes have no workload
@@ -540,8 +530,8 @@ def test_pvc_creation_with_default_sc_set(
     delete_and_wait_pv(core_api, pv_name)
 
 
-@pytest.mark.csi
-def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
+@pytest.mark.csi  # NOQA
+def test_backup_kubernetes_status(set_random_backupstore, client, core_api, pod):  # NOQA
     &#34;&#34;&#34;
     Test that Backups have KubernetesStatus stored properly when there is an
     associated PersistentVolumeClaim and Pod.
@@ -567,7 +557,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         1. Make sure `lastPodRefAt` and `lastPVCRefAt` matched volume on step
         12
     &#34;&#34;&#34;
-    set_random_backupstore(client)
+    update_setting(client, SETTING_DEGRADED_AVAILABILITY, &#34;false&#34;)
 
     host_id = get_self_host_id()
     static_sc_name = &#34;longhorn-static-test&#34;
@@ -625,9 +615,19 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     # is not guaranteed to mount our Volume to the test host.
     snap = create_snapshot(client, volume_name)
     volume.snapshotBackup(name=snap.name)
-    bv, b = find_backup(client, volume_name, snap.name)
-    new_b = bv.backupGet(name=b.name)
-    status = loads(new_b.labels.get(KUBERNETES_STATUS_LABEL))
+    wait_for_backup_completion(client, volume_name, snap.name)
+    _, b = find_backup(client, volume_name, snap.name)
+    # Check backup label
+    status = loads(b.labels.get(KUBERNETES_STATUS_LABEL))
+    assert status == ks
+    # Check backup volume label
+    for _ in range(RETRY_COUNTS):
+        bv = client.by_id_backupVolume(volume_name)
+        if bv is not None and bv.labels is not None:
+            break
+        time.sleep(RETRY_INTERVAL)
+    assert bv is not None and bv.labels is not None
+    status = loads(bv.labels.get(KUBERNETES_STATUS_LABEL))
     assert status == ks
 
     restore_name = generate_volume_name()
@@ -676,13 +676,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         &#39;namespace&#39;: &#39;default&#39;,
         &#39;pvcName&#39;: pvc_name,
         &#39;pvName&#39;: &#39;&#39;,
-        &#39;pvStatus&#39;: &#39;&#39;,
-        &#39;workloadsStatus&#39;: [{
-            &#39;podName&#39;: pod_name,
-            &#39;podStatus&#39;: &#39;Running&#39;,
-            &#39;workloadName&#39;: &#39;&#39;,
-            &#39;workloadType&#39;: &#39;&#39;
-        }]
+        &#39;pvStatus&#39;: &#39;&#39;
     }
     wait_volume_kubernetes_status(client, volume_name, ks)
     volume = wait_for_volume_detached(client, volume_name)
@@ -692,6 +686,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
 
     snap = create_snapshot(client, volume_name)
     volume.snapshotBackup(name=snap.name)
+    volume = wait_for_backup_completion(client, volume_name, snap.name)
     bv, b = find_backup(client, volume_name, snap.name)
     new_b = bv.backupGet(name=b.name)
     status = loads(new_b.labels.get(KUBERNETES_STATUS_LABEL))
@@ -703,12 +698,6 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     assert status[&#39;pvcName&#39;] == pvc_name
     assert status[&#39;pvName&#39;] == &#34;&#34;
     assert status[&#39;pvStatus&#39;] == &#34;&#34;
-    assert status[&#39;workloadsStatus&#39;] == [{
-        &#39;podName&#39;: pod_name,
-        &#39;podStatus&#39;: &#39;Running&#39;,
-        &#39;workloadName&#39;: &#39;&#39;,
-        &#39;workloadType&#39;: &#39;&#39;
-    }]
 
     restore_name = generate_volume_name()
     client.create_volume(name=restore_name, size=SIZE,
@@ -723,13 +712,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         &#39;namespace&#39;: &#39;default&#39;,
         &#39;pvcName&#39;: pvc_name,
         &#39;pvName&#39;: &#39;&#39;,
-        &#39;pvStatus&#39;: &#39;&#39;,
-        &#39;workloadsStatus&#39;: [{
-            &#39;podName&#39;: pod_name,
-            &#39;podStatus&#39;: &#39;Running&#39;,
-            &#39;workloadName&#39;: &#39;&#39;,
-            &#39;workloadType&#39;: &#39;&#39;
-        }]
+        &#39;pvStatus&#39;: &#39;&#39;
     }
     wait_volume_kubernetes_status(client, restore_name, ks)
     restore = client.by_id_volume(restore_name)
@@ -742,7 +725,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     cleanup_volume(client, volume)
 
 
-@pytest.mark.csi
+@pytest.mark.csi  # NOQA
 def test_delete_with_static_pv(client, core_api, volume_name): # NOQA
     &#34;&#34;&#34;
     Test that deleting a Volume with related static Persistent Volume and
@@ -779,7 +762,7 @@ def test_delete_with_static_pv(client, core_api, volume_name): # NOQA
     wait_delete_pvc(core_api, pvc_name)
 
 
-@pytest.mark.csi
+@pytest.mark.csi  # NOQA
 def test_delete_with_provisioned_pv(client, core_api, storage_class, pvc): # NOQA
     &#34;&#34;&#34;
     Test that deleting a Volume with dynamically provisioned Persistent Volume
@@ -805,7 +788,7 @@ def test_delete_with_provisioned_pv(client, core_api, storage_class, pvc): # NOQ
     wait_delete_pvc(core_api, pvc[&#39;metadata&#39;][&#39;name&#39;])
 
 
-@pytest.mark.csi
+@pytest.mark.csi  # NOQA
 def test_delete_provisioned_pvc(client, core_api,  storage_class, pvc): # NOQA
     &#34;&#34;&#34;
     Test that deleting the Persistent Volume Claim for a dynamically
@@ -826,7 +809,47 @@ def test_delete_provisioned_pvc(client, core_api,  storage_class, pvc): # NOQA
 
     delete_and_wait_pvc(core_api, pvc[&#39;metadata&#39;][&#39;name&#39;])
     wait_delete_pv(core_api, pv_name)
-    wait_for_volume_delete(client, volume_name)</code></pre>
+    wait_for_volume_delete(client, volume_name)
+
+
+@pytest.mark.csi  # NOQA
+def test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly(client, core_api, statefulset, storage_class):  # NOQA
+    &#34;&#34;&#34;
+    Test CSI umount when Longhorn block device is disconnected unexpectedly
+
+    GitHub ticket: https://github.com/longhorn/longhorn/issues/3778
+
+    1. Deloy a statefulset that has volumeClaimTemplates with
+        volumeMode: Block
+    2. Crash the engine process of the volume to simulate Longhorn block
+        device is disconnected unexpectedly
+    3. Delete the workload pod
+    4. Verify that the pod is able to terminated and a new pod is able
+        start
+    &#34;&#34;&#34;
+    device_path = &#34;/dev/longhorn/longhorn-test-blk&#34;
+    statefulset[&#39;spec&#39;][&#39;template&#39;][&#39;spec&#39;][&#39;containers&#39;][0][&#39;volumeMounts&#39;] = [] # NOQA
+    statefulset[&#39;spec&#39;][&#39;template&#39;][&#39;spec&#39;][&#39;containers&#39;][0][&#39;volumeDevices&#39;] = [ # NOQA
+        {&#39;name&#39;: &#39;pod-data&#39;, &#39;devicePath&#39;: device_path}
+    ]
+    statefulset[&#39;spec&#39;][&#39;volumeClaimTemplates&#39;][0][&#39;spec&#39;][&#39;volumeMode&#39;] = &#39;Block&#39; # NOQA
+    statefulset[&#39;spec&#39;][&#39;replicas&#39;] = 1
+    statefulset_name = &#39;block-device-disconnect-unexpectedly-test&#39;
+    update_statefulset_manifests(statefulset,
+                                 storage_class,
+                                 statefulset_name)
+
+    create_storage_class(storage_class)
+    create_and_wait_statefulset(statefulset)
+    sspod_info = get_statefulset_pod_info(core_api, statefulset)[0]
+
+    crash_engine_process_with_sigkill(client, core_api,
+                                      sspod_info[&#39;pv_name&#39;])
+    delete_and_wait_pod(core_api,
+                        pod_name=sspod_info[&#39;pod_name&#39;],
+                        wait=False)
+
+    wait_statefulset(statefulset)</code></pre>
 </details>
 </section>
 <section>
@@ -869,7 +892,7 @@ def test_delete_provisioned_pvc(client, core_api,  storage_class, pvc): # NOQA
     assert not found
 
     for p in pod_data:
-        wait_delete_pod(api, p[&#39;pod_name&#39;])</code></pre>
+        wait_delete_pod(api, p[&#39;pod_uid&#39;])</code></pre>
 </details>
 </dd>
 <dt id="tests.test_kubernetes.provision_and_wait_pv"><code class="name flex">
@@ -925,7 +948,7 @@ Volume.</p>
 </details>
 </dd>
 <dt id="tests.test_kubernetes.test_backup_kubernetes_status"><code class="name flex">
-<span>def <span class="ident">test_backup_kubernetes_status</span></span>(<span>client, core_api, pod)</span>
+<span>def <span class="ident">test_backup_kubernetes_status</span></span>(<span>set_random_backupstore, client, core_api, pod)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Test that Backups have KubernetesStatus stored properly when there is an
@@ -960,8 +983,8 @@ time</li>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.mark.csi
-def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
+<pre><code class="python">@pytest.mark.csi  # NOQA
+def test_backup_kubernetes_status(set_random_backupstore, client, core_api, pod):  # NOQA
     &#34;&#34;&#34;
     Test that Backups have KubernetesStatus stored properly when there is an
     associated PersistentVolumeClaim and Pod.
@@ -987,7 +1010,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         1. Make sure `lastPodRefAt` and `lastPVCRefAt` matched volume on step
         12
     &#34;&#34;&#34;
-    set_random_backupstore(client)
+    update_setting(client, SETTING_DEGRADED_AVAILABILITY, &#34;false&#34;)
 
     host_id = get_self_host_id()
     static_sc_name = &#34;longhorn-static-test&#34;
@@ -1045,9 +1068,19 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     # is not guaranteed to mount our Volume to the test host.
     snap = create_snapshot(client, volume_name)
     volume.snapshotBackup(name=snap.name)
-    bv, b = find_backup(client, volume_name, snap.name)
-    new_b = bv.backupGet(name=b.name)
-    status = loads(new_b.labels.get(KUBERNETES_STATUS_LABEL))
+    wait_for_backup_completion(client, volume_name, snap.name)
+    _, b = find_backup(client, volume_name, snap.name)
+    # Check backup label
+    status = loads(b.labels.get(KUBERNETES_STATUS_LABEL))
+    assert status == ks
+    # Check backup volume label
+    for _ in range(RETRY_COUNTS):
+        bv = client.by_id_backupVolume(volume_name)
+        if bv is not None and bv.labels is not None:
+            break
+        time.sleep(RETRY_INTERVAL)
+    assert bv is not None and bv.labels is not None
+    status = loads(bv.labels.get(KUBERNETES_STATUS_LABEL))
     assert status == ks
 
     restore_name = generate_volume_name()
@@ -1096,13 +1129,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         &#39;namespace&#39;: &#39;default&#39;,
         &#39;pvcName&#39;: pvc_name,
         &#39;pvName&#39;: &#39;&#39;,
-        &#39;pvStatus&#39;: &#39;&#39;,
-        &#39;workloadsStatus&#39;: [{
-            &#39;podName&#39;: pod_name,
-            &#39;podStatus&#39;: &#39;Running&#39;,
-            &#39;workloadName&#39;: &#39;&#39;,
-            &#39;workloadType&#39;: &#39;&#39;
-        }]
+        &#39;pvStatus&#39;: &#39;&#39;
     }
     wait_volume_kubernetes_status(client, volume_name, ks)
     volume = wait_for_volume_detached(client, volume_name)
@@ -1112,6 +1139,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
 
     snap = create_snapshot(client, volume_name)
     volume.snapshotBackup(name=snap.name)
+    volume = wait_for_backup_completion(client, volume_name, snap.name)
     bv, b = find_backup(client, volume_name, snap.name)
     new_b = bv.backupGet(name=b.name)
     status = loads(new_b.labels.get(KUBERNETES_STATUS_LABEL))
@@ -1123,12 +1151,6 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     assert status[&#39;pvcName&#39;] == pvc_name
     assert status[&#39;pvName&#39;] == &#34;&#34;
     assert status[&#39;pvStatus&#39;] == &#34;&#34;
-    assert status[&#39;workloadsStatus&#39;] == [{
-        &#39;podName&#39;: pod_name,
-        &#39;podStatus&#39;: &#39;Running&#39;,
-        &#39;workloadName&#39;: &#39;&#39;,
-        &#39;workloadType&#39;: &#39;&#39;
-    }]
 
     restore_name = generate_volume_name()
     client.create_volume(name=restore_name, size=SIZE,
@@ -1143,13 +1165,7 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
         &#39;namespace&#39;: &#39;default&#39;,
         &#39;pvcName&#39;: pvc_name,
         &#39;pvName&#39;: &#39;&#39;,
-        &#39;pvStatus&#39;: &#39;&#39;,
-        &#39;workloadsStatus&#39;: [{
-            &#39;podName&#39;: pod_name,
-            &#39;podStatus&#39;: &#39;Running&#39;,
-            &#39;workloadName&#39;: &#39;&#39;,
-            &#39;workloadType&#39;: &#39;&#39;
-        }]
+        &#39;pvStatus&#39;: &#39;&#39;
     }
     wait_volume_kubernetes_status(client, restore_name, ks)
     restore = client.by_id_volume(restore_name)
@@ -1160,6 +1176,65 @@ def test_backup_kubernetes_status(client, core_api, pod):  # NOQA
     backupstore_cleanup(client)
     client.delete(restore)
     cleanup_volume(client, volume)</code></pre>
+</details>
+</dd>
+<dt id="tests.test_kubernetes.test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly"><code class="name flex">
+<span>def <span class="ident">test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly</span></span>(<span>client, core_api, statefulset, storage_class)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test CSI umount when Longhorn block device is disconnected unexpectedly</p>
+<p>GitHub ticket: <a href="https://github.com/longhorn/longhorn/issues/3778">https://github.com/longhorn/longhorn/issues/3778</a></p>
+<ol>
+<li>Deloy a statefulset that has volumeClaimTemplates with
+volumeMode: Block</li>
+<li>Crash the engine process of the volume to simulate Longhorn block
+device is disconnected unexpectedly</li>
+<li>Delete the workload pod</li>
+<li>Verify that the pod is able to terminated and a new pod is able
+start</li>
+</ol></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.csi  # NOQA
+def test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly(client, core_api, statefulset, storage_class):  # NOQA
+    &#34;&#34;&#34;
+    Test CSI umount when Longhorn block device is disconnected unexpectedly
+
+    GitHub ticket: https://github.com/longhorn/longhorn/issues/3778
+
+    1. Deloy a statefulset that has volumeClaimTemplates with
+        volumeMode: Block
+    2. Crash the engine process of the volume to simulate Longhorn block
+        device is disconnected unexpectedly
+    3. Delete the workload pod
+    4. Verify that the pod is able to terminated and a new pod is able
+        start
+    &#34;&#34;&#34;
+    device_path = &#34;/dev/longhorn/longhorn-test-blk&#34;
+    statefulset[&#39;spec&#39;][&#39;template&#39;][&#39;spec&#39;][&#39;containers&#39;][0][&#39;volumeMounts&#39;] = [] # NOQA
+    statefulset[&#39;spec&#39;][&#39;template&#39;][&#39;spec&#39;][&#39;containers&#39;][0][&#39;volumeDevices&#39;] = [ # NOQA
+        {&#39;name&#39;: &#39;pod-data&#39;, &#39;devicePath&#39;: device_path}
+    ]
+    statefulset[&#39;spec&#39;][&#39;volumeClaimTemplates&#39;][0][&#39;spec&#39;][&#39;volumeMode&#39;] = &#39;Block&#39; # NOQA
+    statefulset[&#39;spec&#39;][&#39;replicas&#39;] = 1
+    statefulset_name = &#39;block-device-disconnect-unexpectedly-test&#39;
+    update_statefulset_manifests(statefulset,
+                                 storage_class,
+                                 statefulset_name)
+
+    create_storage_class(storage_class)
+    create_and_wait_statefulset(statefulset)
+    sspod_info = get_statefulset_pod_info(core_api, statefulset)[0]
+
+    crash_engine_process_with_sigkill(client, core_api,
+                                      sspod_info[&#39;pv_name&#39;])
+    delete_and_wait_pod(core_api,
+                        pod_name=sspod_info[&#39;pod_name&#39;],
+                        wait=False)
+
+    wait_statefulset(statefulset)</code></pre>
 </details>
 </dd>
 <dt id="tests.test_kubernetes.test_delete_provisioned_pvc"><code class="name flex">
@@ -1182,7 +1257,7 @@ be updated correctly.</li>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.mark.csi
+<pre><code class="python">@pytest.mark.csi  # NOQA
 def test_delete_provisioned_pvc(client, core_api,  storage_class, pvc): # NOQA
     &#34;&#34;&#34;
     Test that deleting the Persistent Volume Claim for a dynamically
@@ -1226,7 +1301,7 @@ be updated correctly.</li>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.mark.csi
+<pre><code class="python">@pytest.mark.csi  # NOQA
 def test_delete_with_provisioned_pv(client, core_api, storage_class, pvc): # NOQA
     &#34;&#34;&#34;
     Test that deleting a Volume with dynamically provisioned Persistent Volume
@@ -1272,7 +1347,7 @@ resources.</li>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.mark.csi
+<pre><code class="python">@pytest.mark.csi  # NOQA
 def test_delete_with_static_pv(client, core_api, volume_name): # NOQA
     &#34;&#34;&#34;
     Test that deleting a Volume with related static Persistent Volume and
@@ -1487,24 +1562,8 @@ def test_kubernetes_status(client, core_api, storage_class,  # NOQA
         ks_list[i][&#39;lastPVCRefAt&#39;] = &#39;&#39;
         if i == 0:
             ks_list[i][&#39;lastPodRefAt&#39;] = &#39;not empty&#39;
-            ks_list[i][&#39;workloadsStatus&#39;] = [
-                {
-                    &#39;podName&#39;: p[&#39;pod_name&#39;],
-                    &#39;podStatus&#39;: &#39;Running&#39;,
-                    &#39;workloadName&#39;: statefulset_name,
-                    &#39;workloadType&#39;: &#39;StatefulSet&#39;,
-                },
-            ]
         if i == 1:
             ks_list[i][&#39;lastPodRefAt&#39;] = &#39;&#39;
-            ks_list[i][&#39;workloadsStatus&#39;] = [
-                {
-                    &#39;podName&#39;: extra_pod_name,
-                    &#39;podStatus&#39;: &#39;Running&#39;,
-                    &#39;workloadName&#39;: &#39;&#39;,
-                    &#39;workloadType&#39;: &#39;&#39;,
-                }
-            ]
         wait_volume_kubernetes_status(client, volume_name, ks_list[i])
 
     # deleted extra_pod, all volumes have no workload
@@ -1841,6 +1900,7 @@ def test_pvc_creation_with_default_sc_set(
 <li><code><a title="tests.test_kubernetes.delete_and_wait_statefulset_only" href="#tests.test_kubernetes.delete_and_wait_statefulset_only">delete_and_wait_statefulset_only</a></code></li>
 <li><code><a title="tests.test_kubernetes.provision_and_wait_pv" href="#tests.test_kubernetes.provision_and_wait_pv">provision_and_wait_pv</a></code></li>
 <li><code><a title="tests.test_kubernetes.test_backup_kubernetes_status" href="#tests.test_kubernetes.test_backup_kubernetes_status">test_backup_kubernetes_status</a></code></li>
+<li><code><a title="tests.test_kubernetes.test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly" href="#tests.test_kubernetes.test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly">test_csi_umount_when_longhorn_block_device_is_disconnected_unexpectedly</a></code></li>
 <li><code><a title="tests.test_kubernetes.test_delete_provisioned_pvc" href="#tests.test_kubernetes.test_delete_provisioned_pvc">test_delete_provisioned_pvc</a></code></li>
 <li><code><a title="tests.test_kubernetes.test_delete_with_provisioned_pv" href="#tests.test_kubernetes.test_delete_with_provisioned_pv">test_delete_with_provisioned_pv</a></code></li>
 <li><code><a title="tests.test_kubernetes.test_delete_with_static_pv" href="#tests.test_kubernetes.test_delete_with_static_pv">test_delete_with_static_pv</a></code></li>
@@ -1853,7 +1913,7 @@ def test_pvc_creation_with_default_sc_set(
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.4</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
