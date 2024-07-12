@@ -87,6 +87,24 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="tests.common.check_backing_image_eviction_failed"><code class="name flex">
+<span>def <span class="ident">check_backing_image_eviction_failed</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tests.common.check_backing_image_single_copy_disk_eviction"><code class="name flex">
+<span>def <span class="ident">check_backing_image_single_copy_disk_eviction</span></span>(<span>client, bi_name, old_disk_id)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tests.common.check_backing_image_single_copy_node_eviction"><code class="name flex">
+<span>def <span class="ident">check_backing_image_single_copy_node_eviction</span></span>(<span>client, bi_name, old_node)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="tests.common.check_block_device_size"><code class="name flex">
 <span>def <span class="ident">check_block_device_size</span></span>(<span>volume, size)</span>
 </code></dt>
@@ -222,6 +240,12 @@ properly.
 </dd>
 <dt id="tests.common.cleanup_crypto_secret"><code class="name flex">
 <span>def <span class="ident">cleanup_crypto_secret</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tests.common.cleanup_disks_on_node"><code class="name flex">
+<span>def <span class="ident">cleanup_disks_on_node</span></span>(<span>client, node_id, *disks)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -373,7 +397,7 @@ args:
 arguments for function.</p></div>
 </dd>
 <dt id="tests.common.create_backing_image_with_matching_url"><code class="name flex">
-<span>def <span class="ident">create_backing_image_with_matching_url</span></span>(<span>client, name, url)</span>
+<span>def <span class="ident">create_backing_image_with_matching_url</span></span>(<span>client, name, url, minNumberOfCopies=1, nodeSelector=[], diskSelector=[])</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -979,6 +1003,12 @@ greater than MAX_SUPPORT_BINDLE_NUMBER.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="tests.common.get_node_by_disk_id"><code class="name flex">
+<span>def <span class="ident">get_node_by_disk_id</span></span>(<span>client, disk_id)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="tests.common.get_pod_data_md5sum"><code class="name flex">
 <span>def <span class="ident">get_pod_data_md5sum</span></span>(<span>api, pod_name, path)</span>
 </code></dt>
@@ -1424,6 +1454,12 @@ Retry if "too many retries error" happened.
 :param node: The Node to update.
 :param tags: The tags to set on the node.
 :return: The updated Node.</p></div>
+</dd>
+<dt id="tests.common.set_tags_for_node_and_its_disks"><code class="name flex">
+<span>def <span class="ident">set_tags_for_node_and_its_disks</span></span>(<span>client, node, tags)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="tests.common.settings_reset"><code class="name flex">
 <span>def <span class="ident">settings_reset</span></span>(<span>)</span>
@@ -2122,6 +2158,12 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="tests.common.wait_for_volume_replica_rebuilt_on_same_node_different_disk"><code class="name flex">
+<span>def <span class="ident">wait_for_volume_replica_rebuilt_on_same_node_different_disk</span></span>(<span>client, node_name, volume_name, old_disk_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="tests.common.wait_for_volume_replicas_mode"><code class="name flex">
 <span>def <span class="ident">wait_for_volume_replicas_mode</span></span>(<span>client, volname, mode, replica_names=None, replica_count=None)</span>
 </code></dt>
@@ -2402,6 +2444,9 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.batch_v1_api" href="#tests.common.batch_v1_api">batch_v1_api</a></code></li>
 <li><code><a title="tests.common.check_all_support_bundle_managers_deleted" href="#tests.common.check_all_support_bundle_managers_deleted">check_all_support_bundle_managers_deleted</a></code></li>
 <li><code><a title="tests.common.check_backing_image_disk_map_status" href="#tests.common.check_backing_image_disk_map_status">check_backing_image_disk_map_status</a></code></li>
+<li><code><a title="tests.common.check_backing_image_eviction_failed" href="#tests.common.check_backing_image_eviction_failed">check_backing_image_eviction_failed</a></code></li>
+<li><code><a title="tests.common.check_backing_image_single_copy_disk_eviction" href="#tests.common.check_backing_image_single_copy_disk_eviction">check_backing_image_single_copy_disk_eviction</a></code></li>
+<li><code><a title="tests.common.check_backing_image_single_copy_node_eviction" href="#tests.common.check_backing_image_single_copy_node_eviction">check_backing_image_single_copy_node_eviction</a></code></li>
 <li><code><a title="tests.common.check_block_device_size" href="#tests.common.check_block_device_size">check_block_device_size</a></code></li>
 <li><code><a title="tests.common.check_csi" href="#tests.common.check_csi">check_csi</a></code></li>
 <li><code><a title="tests.common.check_csi_expansion" href="#tests.common.check_csi_expansion">check_csi_expansion</a></code></li>
@@ -2424,6 +2469,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.cleanup_all_volumes" href="#tests.common.cleanup_all_volumes">cleanup_all_volumes</a></code></li>
 <li><code><a title="tests.common.cleanup_client" href="#tests.common.cleanup_client">cleanup_client</a></code></li>
 <li><code><a title="tests.common.cleanup_crypto_secret" href="#tests.common.cleanup_crypto_secret">cleanup_crypto_secret</a></code></li>
+<li><code><a title="tests.common.cleanup_disks_on_node" href="#tests.common.cleanup_disks_on_node">cleanup_disks_on_node</a></code></li>
 <li><code><a title="tests.common.cleanup_host_disk" href="#tests.common.cleanup_host_disk">cleanup_host_disk</a></code></li>
 <li><code><a title="tests.common.cleanup_host_disks" href="#tests.common.cleanup_host_disks">cleanup_host_disks</a></code></li>
 <li><code><a title="tests.common.cleanup_node_disks" href="#tests.common.cleanup_node_disks">cleanup_node_disks</a></code></li>
@@ -2535,6 +2581,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.get_liveness_probe_spec" href="#tests.common.get_liveness_probe_spec">get_liveness_probe_spec</a></code></li>
 <li><code><a title="tests.common.get_longhorn_api_client" href="#tests.common.get_longhorn_api_client">get_longhorn_api_client</a></code></li>
 <li><code><a title="tests.common.get_mgr_ips" href="#tests.common.get_mgr_ips">get_mgr_ips</a></code></li>
+<li><code><a title="tests.common.get_node_by_disk_id" href="#tests.common.get_node_by_disk_id">get_node_by_disk_id</a></code></li>
 <li><code><a title="tests.common.get_pod_data_md5sum" href="#tests.common.get_pod_data_md5sum">get_pod_data_md5sum</a></code></li>
 <li><code><a title="tests.common.get_process_info" href="#tests.common.get_process_info">get_process_info</a></code></li>
 <li><code><a title="tests.common.get_pv_manifest" href="#tests.common.get_pv_manifest">get_pv_manifest</a></code></li>
@@ -2603,6 +2650,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.set_node_scheduling" href="#tests.common.set_node_scheduling">set_node_scheduling</a></code></li>
 <li><code><a title="tests.common.set_node_scheduling_eviction" href="#tests.common.set_node_scheduling_eviction">set_node_scheduling_eviction</a></code></li>
 <li><code><a title="tests.common.set_node_tags" href="#tests.common.set_node_tags">set_node_tags</a></code></li>
+<li><code><a title="tests.common.set_tags_for_node_and_its_disks" href="#tests.common.set_tags_for_node_and_its_disks">set_tags_for_node_and_its_disks</a></code></li>
 <li><code><a title="tests.common.settings_reset" href="#tests.common.settings_reset">settings_reset</a></code></li>
 <li><code><a title="tests.common.size_to_string" href="#tests.common.size_to_string">size_to_string</a></code></li>
 <li><code><a title="tests.common.statefulset" href="#tests.common.statefulset">statefulset</a></code></li>
@@ -2717,6 +2765,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.wait_for_volume_recurring_job_update" href="#tests.common.wait_for_volume_recurring_job_update">wait_for_volume_recurring_job_update</a></code></li>
 <li><code><a title="tests.common.wait_for_volume_replica_auto_balance_update" href="#tests.common.wait_for_volume_replica_auto_balance_update">wait_for_volume_replica_auto_balance_update</a></code></li>
 <li><code><a title="tests.common.wait_for_volume_replica_count" href="#tests.common.wait_for_volume_replica_count">wait_for_volume_replica_count</a></code></li>
+<li><code><a title="tests.common.wait_for_volume_replica_rebuilt_on_same_node_different_disk" href="#tests.common.wait_for_volume_replica_rebuilt_on_same_node_different_disk">wait_for_volume_replica_rebuilt_on_same_node_different_disk</a></code></li>
 <li><code><a title="tests.common.wait_for_volume_replicas_mode" href="#tests.common.wait_for_volume_replicas_mode">wait_for_volume_replicas_mode</a></code></li>
 <li><code><a title="tests.common.wait_for_volume_replicas_running_on_hosts" href="#tests.common.wait_for_volume_replicas_running_on_hosts">wait_for_volume_replicas_running_on_hosts</a></code></li>
 <li><code><a title="tests.common.wait_for_volume_restoration_completed" href="#tests.common.wait_for_volume_restoration_completed">wait_for_volume_restoration_completed</a></code></li>

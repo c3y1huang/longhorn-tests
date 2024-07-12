@@ -449,9 +449,7 @@ Test Setup  Deploy the CSI snapshot CRDs, Controller as instructed at https://lo
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://longhorn.github.io/longhorn-tests/manual/pre-release/ha/ha-volume-migration/</guid>
-      <description>Create a migratable volume:
- Deploy a migratable StorageClass. e.g., https://github.com/longhorn/longhorn/blob/master/examples/rwx/storageclass-migratable.yaml Create a PVC with access mode ReadWriteMany via this StorageClass.    Attach a volume to a node and wait for volume running. Then write some data into the volume. Here I would recommend directly restoring a volume (set fromBackup in the StorageClass) and attach it instead.
-  Start the migration by request attaching to another node for the volume.</description>
+      <description>Basic instructions  Deploy a migratable StorageClass. E.g.:  kind: StorageClass apiVersion: storage.k8s.io/v1 metadata: name: test-sc provisioner: driver.longhorn.io allowVolumeExpansion: true parameters: numberOfReplicas: &amp;#34;3&amp;#34; migratable: &amp;#34;true&amp;#34; Create a migratable Volume. E.g.:  apiVersion: v1 kind: PersistentVolumeClaim metadata: name: test-pvc namespace: default spec: accessModes: - ReadWriteMany volumeMode: Block storageClassName: test-sc resources: requests: storage: 1Gi Attach the volume to a node and wait for it to become running. E.g.:  apiVersion: storage.k8s.io/v1 kind: VolumeAttachment metadata: name: test-va-1 spec: attacher: driver.</description>
     </item>
     
     <item>
@@ -751,6 +749,17 @@ Test storage network Create AWS instances Given Create VPC.
       <guid>https://longhorn.github.io/longhorn-tests/manual/pre-release/basic-operations/snapshot-while-writing-data/</guid>
       <description>Related issue: https://github.com/longhorn/longhorn/issues/2187
 Scenario  Create a kubernetes pod + pvc that mounts a Longhorn volume. Write 5 Gib into the pod using dd if=/dev/urandom of=/mnt/&amp;lt;volume&amp;gt; count=5000 bs=1M conv=fsync status=progress While running the above command initiate a snapshot. Verify the logs of the instance-manager using kubetail instance-manager -n longhorn-system. There should some logs related to freezing and unfreezing the filesystem. Like Froze filesystem of volume mounted ... Verify snapshot succeeded and dd operation will complete.</description>
+    </item>
+    
+    <item>
+      <title>Storage Network Support for RWX Volume</title>
+      <link>https://longhorn.github.io/longhorn-tests/manual/release-specific/v1.7.0/test-storage-network-support-for-rwx-volume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://longhorn.github.io/longhorn-tests/manual/release-specific/v1.7.0/test-storage-network-support-for-rwx-volume/</guid>
+      <description>Related Issues  https://github.com/longhorn/longhorn/issues/8184  Test Longhorn Upgrade with Pre-existing RWX Volume Workloads and Storage Network Configured Verify the behavior of Longhorn RWX volume workloads during and after the cluster upgrade process with existing storage network configured. Ensure no disruption to existing workload pods during the upgrade.
+Given A cluster with Longhorn v1.6.2 installed.
+&amp;gt; kubectl -n longhorn-system get daemonsets.apps longhorn-manager -o yaml | grep image: image: longhornio/longhorn-manager:v1.6.2 And The storage-network setting is set to a valid NAD.</description>
     </item>
     
     <item>
