@@ -473,6 +473,23 @@ Test with K8s upgrade  Create a K8s (Immediate prior version) cluster with 3 wor
     </item>
     
     <item>
+      <title>Longhorn Commandline Interface (longhornctl)</title>
+      <link>https://longhorn.github.io/longhorn-tests/manual/release-specific/v1.7.0/test-longhorn-cli-longhornctl/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://longhorn.github.io/longhorn-tests/manual/release-specific/v1.7.0/test-longhorn-cli-longhornctl/</guid>
+      <description>Related issues  https://github.com/longhorn/longhorn/issues/7927  Test install preflight Given longhornctl binary.
+And longhornctl image.
+When Execute longhornctl install preflight.
+&amp;gt; ./bin/longhornctl -l debug --image=&amp;#34;c3y1huang/research:longhornctl-407&amp;#34; install preflight Then Command should succeed.
+INFO[2024-06-24T10:23:16+08:00] Completed preflight installer. Use &#39;longhornctl check preflight&#39; to check the result. Test check preflight Given longhornctl binary.
+And longhornctl image.
+When Execute longhornctl check preflight.
+&amp;gt; ./bin/longhornctl -l debug --image=&amp;#34;c3y1huang/research:longhornctl-407&amp;#34; check preflight Then Command should show result.
+INFO[2024-06-24T10:24:54+08:00] Retrieved preflight checker result: ip-10-0-2-106: info: - Service iscsid is running - NFS4 is supported - Package nfs-client is installed - Package open-iscsi is installed - CPU instruction set sse4_2 is supported - HugePages is enabled - Module nvme_tcp is loaded - Module uio_pci_generic is loaded ip-10-0-2-181: info: - Service iscsid is running - NFS4 is supported - Package nfs-client is installed - Package open-iscsi is installed - CPU instruction set sse4_2 is supported - HugePages is enabled - Module nvme_tcp is loaded - Module uio_pci_generic is loaded ip-10-0-2-219: info: - Service iscsid is running - NFS4 is supported - Package nfs-client is installed - Package open-iscsi is installed - CPU instruction set sse4_2 is supported - HugePages is enabled - Module nvme_tcp is loaded - Module uio_pci_generic is loaded And Command should succeed.</description>
+    </item>
+    
+    <item>
       <title>Longhorn in an hardened cluster</title>
       <link>https://longhorn.github.io/longhorn-tests/manual/rancher-integration/lh-hardend-rancher/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -723,7 +740,7 @@ Test storage network Create AWS instances Given Create VPC.
  Attach to VPC  And Add the internet gateway to the VPC Main route table, Routes.
  Destination 0.0.0.0/0  And Create 2 subnets in the VPC.
  Subnet-1: 10.0.1.0/24 Subnet-2: 10.0.2.0/24  And Launch 3 EC2 instances.
- Use the created VPC Use subnet-1 for network interface 1 Use subnet-2 for network interface 2 Disable Auto-assign public IP Add security group inbound rule to allow All traffic from Anywhere-IPv4 Stop Source/destination check  And Create 3 elastic IPs.</description>
+ Use the created VPC Use subnet-1 for network interface 1 Use subnet-2 for network interface 2 Disable Auto-assign public IP Add security group inbound rule to allow All traffic from Anywhere-IPv4 Stop Source/destination check.</description>
     </item>
     
     <item>
@@ -738,7 +755,7 @@ Test storage network Create AWS instances Given Create VPC.
  Attach to VPC  And Add the internet gateway to the VPC Main route table, Routes.
  Destination 0.0.0.0/0  And Create 2 subnets in the VPC.
  Subnet-1: 10.0.1.0/24 Subnet-2: 10.0.2.0/24  And Launch 3 EC2 instances.
- Use the created VPC Use subnet-1 for network interface 1 Use subnet-2 for network interface 2 Disable Auto-assign public IP Add security group inbound rule to allow All traffic from Anywhere-IPv4 Stop Source/destination check  And Create 3 elastic IPs.</description>
+ Use the created VPC Use subnet-1 for network interface 1 Use subnet-2 for network interface 2 Disable Auto-assign public IP Add security group inbound rule to allow All traffic from Anywhere-IPv4 Stop Source/destination check.</description>
     </item>
     
     <item>
@@ -1758,7 +1775,7 @@ Test steps: Kubectl apply -f  Install Longhorn v1.0.2 kubectl apply -f https://r
       
       <guid>https://longhorn.github.io/longhorn-tests/manual/pre-release/v2-volume/sanity-check/</guid>
       <description>Related doc: https://longhorn.io/docs/1.6.0/v2-data-engine/features/
- Support both amd64 and arm64 Volume creation, attachment, detachment and deletion Automatic offline replica rebuilding Orphaned replica management Snapshot creation, deletion and reversion Volume backup and restoration Selective v2 Data Engine activation Upgrade Longhorn from previous version with v2 volume  </description>
+ Support both amd64 and arm64 Volume creation, attachment, detachment and deletion Filesystem trim Replica online rebuilding Orphaned replica management Snapshot creation, deletion and reversion Volume backup and restoration Selective v2 Data Engine activation Upgrade Longhorn from previous version with v2 volume v2 volume live upgrade  </description>
     </item>
     
     <item>
