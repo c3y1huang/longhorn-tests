@@ -1072,6 +1072,47 @@ properly.
 </details>
 <div class="desc"></div>
 </dd>
+<dt id="tests.common.cleanup_selected_disks_on_node"><code class="name flex">
+<span>def <span class="ident">cleanup_selected_disks_on_node</span></span>(<span>client, node_id, *disks)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cleanup_selected_disks_on_node(client, node_id, *disks):  # NOQA
+    # Disable scheduling for the new disks on self node
+    node = client.by_id_node(node_id)
+    for name, disk in node.disks.items():
+        if name in disks:
+            disk.allowScheduling = False
+
+    # Update disks of self node
+    update_disks = get_update_disks(node.disks)
+    update_node_disks(client, node.name, disks=update_disks, retry=True)
+    node = wait_for_disk_update(client, node_id, len(update_disks))
+
+    # Remove disks on self node and enable scheduling for the available disks
+    available_disks = {}
+    for name, disk in iter(node.disks.items()):
+        if name not in disks:
+            disk.allowScheduling = True
+            available_disks[name] = disk
+
+    # Update disks of self node
+    update_disks = get_update_disks(node.disks)
+    update_node_disks(client, node.name, disks=available_disks, retry=True)
+    wait_for_disk_update(client, node_id, len(available_disks))
+
+    node = client.by_id_node(node_id)
+
+    # Cleanup host disks
+    if DATA_ENGINE == &#34;v1&#34;:
+        for disk in disks:
+            cleanup_host_disks(client, disk)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
 <dt id="tests.common.cleanup_storage_class"><code class="name flex">
 <span>def <span class="ident">cleanup_storage_class</span></span>(<span>)</span>
 </code></dt>
@@ -1394,16 +1435,28 @@ def core_api(request):
     volume = client.by_id_volume(volume_name)
     ins_mgr_name = volume.controllers[0].instanceManagerName
 
-    kill_command = [
-            &#39;/bin/sh&#39;, &#39;-c&#39;,
-            &#34;kill `pgrep -f \&#34;controller &#34; + volume_name + &#34;\&#34;`&#34;]
+    if DATA_ENGINE == &#34;v2&#34;:
+        engine_name = volume.controllers[0][&#34;name&#34;]
 
-    with timeout(seconds=STREAM_EXEC_TIMEOUT,
-                 error_message=&#39;Timeout on executing stream read&#39;):
-        stream(core_api.connect_get_namespaced_pod_exec,
-               ins_mgr_name,
-               LONGHORN_NAMESPACE, command=kill_command,
-               stderr=True, stdin=False, stdout=True, tty=False)</code></pre>
+        delete_raid_command = (
+            f&#34;go-spdk-helper bdev-raid delete {engine_name}&#34;
+        )
+        print(f&#34;Executing command: {delete_raid_command}&#34;)
+
+        exec_instance_manager(
+            core_api, ins_mgr_name, delete_raid_command
+        )
+    else:
+        kill_command = [
+                &#39;/bin/sh&#39;, &#39;-c&#39;,
+                &#34;kill `pgrep -f \&#34;controller &#34; + volume_name + &#34;\&#34;`&#34;]
+
+        with timeout(seconds=STREAM_EXEC_TIMEOUT,
+                     error_message=&#39;Timeout on executing stream read&#39;):
+            stream(core_api.connect_get_namespaced_pod_exec,
+                   ins_mgr_name,
+                   LONGHORN_NAMESPACE, command=kill_command,
+                   stderr=True, stdin=False, stdout=True, tty=False)</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -1425,13 +1478,35 @@ def core_api(request):
 
     for r in replicas:
         assert r.instanceManagerName != &#34;&#34;
+        if DATA_ENGINE == &#34;v2&#34;:
+            replica_name = r[&#34;name&#34;]
 
-        pgrep_command = f&#34;pgrep -f {r[&#39;dataPath&#39;]}&#34;
-        pid = exec_instance_manager(api, r.instanceManagerName, pgrep_command)
-        assert pid != &#34;&#34;
+            get_nqn_command = (
+                &#34;go-spdk-helper nvmf subsystem-get | &#34;
+                &#34;tr \&#34;&#39;\&#34; &#39;\&#34;&#39; | &#34;
+                &#34;grep &#39;\&#34;nqn\&#34;&#39; | &#34;
+                &#34;grep &#39;%s&#39; | &#34;
+                &#34;head -n 1 | cut -d&#39;\&#34;&#39; -f4&#34;
+            ) % replica_name
+            nqn = exec_instance_manager(api, r.instanceManagerName,
+                                        get_nqn_command).strip()
 
-        kill_command = f&#34;kill {pid}&#34;
-        exec_instance_manager(api, r.instanceManagerName, kill_command)
+            assert nqn != &#34;&#34;, \
+                f&#34;Failed to extract NQN for replica {replica_name}&#34;
+
+            stop_expose_command = f&#34;go-spdk-helper expose stop --nqn {nqn}&#34;
+            print(f&#34;Executing command: {stop_expose_command}&#34;)
+            exec_instance_manager(
+                api, r.instanceManagerName, stop_expose_command
+            )
+        else:
+            pgrep_command = f&#34;pgrep -f {r[&#39;dataPath&#39;]}&#34;
+            pid = exec_instance_manager(api, r.instanceManagerName,
+                                        pgrep_command)
+            assert pid != &#34;&#34;
+
+            kill_command = f&#34;kill {pid}&#34;
+            exec_instance_manager(api, r.instanceManagerName, kill_command)
 
         if wait_to_fail is True:
             thread = create_assert_error_check_thread(
@@ -1872,8 +1947,10 @@ backup</p></div>
     volume = create_volume(client, vol_name, size, node_id, 1)
 
     # prepare the disk in the host filesystem
-    disk_path = prepare_host_disk(get_volume_endpoint(volume), volume.name)
-    return disk_path</code></pre>
+    if DATA_ENGINE == &#34;v1&#34;:
+        disk_path = prepare_host_disk(get_volume_endpoint(volume), volume.name)
+        return disk_path
+    return get_volume_endpoint(volume)</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -2335,6 +2412,45 @@ def csi_pv_backingimage(request):
 <pre><code class="python">@pytest.fixture
 def csi_pvc_name(request):
     return generate_volume_name()</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="tests.common.delete_all_v2_instance_manager_pods"><code class="name flex">
+<span>def <span class="ident">delete_all_v2_instance_manager_pods</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete_all_v2_instance_manager_pods():
+    # Keep a v2 volume in the faulted state by deleting all instance-manager
+    # pods until volume salvage is triggered.
+    api = get_core_api_client()
+
+    label_selector = (
+        &#34;longhorn.io/component=instance-manager,&#34;
+        &#34;longhorn.io/data-engine=v2&#34;
+    )
+
+    pods = api.list_namespaced_pod(
+        namespace=LONGHORN_NAMESPACE,
+        label_selector=label_selector
+    )
+
+    for pod in pods.items:
+        pod_name = pod.metadata.name
+        print(f&#34;Force deleting pod {pod_name}&#34;)
+
+        api.delete_namespaced_pod(
+            name=pod_name,
+            namespace=LONGHORN_NAMESPACE,
+            grace_period_seconds=0,
+            body=k8sclient.V1DeleteOptions(
+                grace_period_seconds=0,
+                propagation_policy=&#34;Background&#34;
+            )
+        )</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -6857,7 +6973,7 @@ def volume_name(request):
 <div class="desc"></div>
 </dd>
 <dt id="tests.common.wait_and_get_any_deployment_pod"><code class="name flex">
-<span>def <span class="ident">wait_and_get_any_deployment_pod</span></span>(<span>core_api, deployment_name, is_phase='Running', timeout_cnt=240)</span>
+<span>def <span class="ident">wait_and_get_any_deployment_pod</span></span>(<span>core_api, deployment_name, is_phase='Running', timeout_cnt=360)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -7108,27 +7224,38 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
     core_api = get_core_api_client()
 
     nodes = client.list_node()
+    v2_enabled = (
+        client.by_id_setting(SETTING_V2_DATA_ENGINE).value in [&#34;true&#34;, True]
+    )
 
     for _ in range(RETRY_COUNTS):
         instance_managers = client.list_instance_manager()
         node_to_instance_manager_map = {}
-        try:
-            for im in instance_managers:
-                if im.managerType == &#34;aio&#34;:
-                    node_to_instance_manager_map[im.nodeID] = im
-                else:
-                    print(&#34;\nFound unknown instance manager:&#34;, im)
-            if len(node_to_instance_manager_map) != len(nodes):
-                time.sleep(RETRY_INTERVAL)
-                continue
 
-            for _, im in node_to_instance_manager_map.items():
-                wait_for_instance_manager_desire_state(client, core_api,
-                                                       im.name, &#34;Running&#34;,
-                                                       True)
-            break
-        except Exception:
-            continue</code></pre>
+        for im in instance_managers:
+            node_to_instance_manager_map.setdefault(im.nodeID,
+                                                    []).append(im)
+
+        expected = len(nodes) * (2 if v2_enabled else 1)
+        actual_count = sum(
+            len(v) for v in node_to_instance_manager_map.values()
+        )
+
+        if actual_count != expected:
+            time.sleep(RETRY_INTERVAL)
+            continue
+
+        for ims in node_to_instance_manager_map.values():
+            for im in ims:
+                wait_for_instance_manager_desire_state(
+                    client, core_api,
+                    im.name, &#34;Running&#34;,
+                    True)
+        return
+
+    print(&#34;Wait for instance manager running timeout&#34;)
+    assert actual_count == expected, \
+        f&#34;Expected {expected} IMs, but got {actual_count}&#34;</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -8485,7 +8612,7 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
             break
         time.sleep(retry_interval)
     assert started
-    return status.fromReplica, status.replica</code></pre>
+    return status.fromReplicaList, status.replica</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -8744,6 +8871,34 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
         count = 0
         for snapshot in volume.snapshotList():
             if snapshot.removed is False or count_removed:
+                count += 1
+
+        if count == number:
+            return
+        time.sleep(RETRY_SNAPSHOT_INTERVAL)
+
+    assert False, \
+        f&#34;failed to wait for snapshot.\n&#34; \
+        f&#34;Expect count={number}\n&#34; \
+        f&#34;Got count={count}&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="tests.common.wait_for_snapshot_cr_count"><code class="name flex">
+<span>def <span class="ident">wait_for_snapshot_cr_count</span></span>(<span>volume, number, retry_counts=120, count_removed=False)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wait_for_snapshot_cr_count(volume, number,
+                               retry_counts=120,
+                               count_removed=False):
+    for _ in range(retry_counts):
+        count = 0
+        for snapshot in volume.snapshotCRList():
+            if snapshot.markRemoved is False or count_removed:
                 count += 1
 
         if count == number:
@@ -9247,14 +9402,14 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
 <div class="desc"></div>
 </dd>
 <dt id="tests.common.wait_for_volume_healthy"><code class="name flex">
-<span>def <span class="ident">wait_for_volume_healthy</span></span>(<span>client, name, retry_count=150)</span>
+<span>def <span class="ident">wait_for_volume_healthy</span></span>(<span>client, name, retry_count=1200)</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def wait_for_volume_healthy(client, name, retry_count=RETRY_COUNTS):
+<pre><code class="python">def wait_for_volume_healthy(client, name, retry_count=RETRY_COUNTS_LONG):
     wait_for_volume_status(client, name,
                            VOLUME_FIELD_STATE,
                            VOLUME_STATE_ATTACHED, retry_count)
@@ -9588,7 +9743,7 @@ ref: <a href="https://github.com/longhorn/longhorn/issues/4814">https://github.c
 <div class="desc"></div>
 </dd>
 <dt id="tests.common.wait_for_volume_status"><code class="name flex">
-<span>def <span class="ident">wait_for_volume_status</span></span>(<span>client, name, key, value, retry_count=360)</span>
+<span>def <span class="ident">wait_for_volume_status</span></span>(<span>client, name, key, value, retry_count=1200)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -10187,6 +10342,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.cleanup_host_disk" href="#tests.common.cleanup_host_disk">cleanup_host_disk</a></code></li>
 <li><code><a title="tests.common.cleanup_host_disks" href="#tests.common.cleanup_host_disks">cleanup_host_disks</a></code></li>
 <li><code><a title="tests.common.cleanup_node_disks" href="#tests.common.cleanup_node_disks">cleanup_node_disks</a></code></li>
+<li><code><a title="tests.common.cleanup_selected_disks_on_node" href="#tests.common.cleanup_selected_disks_on_node">cleanup_selected_disks_on_node</a></code></li>
 <li><code><a title="tests.common.cleanup_storage_class" href="#tests.common.cleanup_storage_class">cleanup_storage_class</a></code></li>
 <li><code><a title="tests.common.cleanup_test_disks" href="#tests.common.cleanup_test_disks">cleanup_test_disks</a></code></li>
 <li><code><a title="tests.common.cleanup_volume" href="#tests.common.cleanup_volume">cleanup_volume</a></code></li>
@@ -10226,6 +10382,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.csi_pv" href="#tests.common.csi_pv">csi_pv</a></code></li>
 <li><code><a title="tests.common.csi_pv_backingimage" href="#tests.common.csi_pv_backingimage">csi_pv_backingimage</a></code></li>
 <li><code><a title="tests.common.csi_pvc_name" href="#tests.common.csi_pvc_name">csi_pvc_name</a></code></li>
+<li><code><a title="tests.common.delete_all_v2_instance_manager_pods" href="#tests.common.delete_all_v2_instance_manager_pods">delete_all_v2_instance_manager_pods</a></code></li>
 <li><code><a title="tests.common.delete_and_wait_deployment" href="#tests.common.delete_and_wait_deployment">delete_and_wait_deployment</a></code></li>
 <li><code><a title="tests.common.delete_and_wait_longhorn" href="#tests.common.delete_and_wait_longhorn">delete_and_wait_longhorn</a></code></li>
 <li><code><a title="tests.common.delete_and_wait_pod" href="#tests.common.delete_and_wait_pod">delete_and_wait_pod</a></code></li>
@@ -10471,6 +10628,7 @@ from the args and kwargs arguments, respectively.</p></div>
 <li><code><a title="tests.common.wait_for_restoration_start" href="#tests.common.wait_for_restoration_start">wait_for_restoration_start</a></code></li>
 <li><code><a title="tests.common.wait_for_running_engine_image_count" href="#tests.common.wait_for_running_engine_image_count">wait_for_running_engine_image_count</a></code></li>
 <li><code><a title="tests.common.wait_for_snapshot_count" href="#tests.common.wait_for_snapshot_count">wait_for_snapshot_count</a></code></li>
+<li><code><a title="tests.common.wait_for_snapshot_cr_count" href="#tests.common.wait_for_snapshot_cr_count">wait_for_snapshot_cr_count</a></code></li>
 <li><code><a title="tests.common.wait_for_snapshot_purge" href="#tests.common.wait_for_snapshot_purge">wait_for_snapshot_purge</a></code></li>
 <li><code><a title="tests.common.wait_for_support_bundle_cleanup" href="#tests.common.wait_for_support_bundle_cleanup">wait_for_support_bundle_cleanup</a></code></li>
 <li><code><a title="tests.common.wait_for_support_bundle_state" href="#tests.common.wait_for_support_bundle_state">wait_for_support_bundle_state</a></code></li>
