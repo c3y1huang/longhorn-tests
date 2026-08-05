@@ -340,13 +340,6 @@ def test_upgrade(client, core_api, volume_name, csi_pv, # NOQA
 
     # v2 data engine CRs
     if v2_data_engine_crs_before_upgrade:
-        v2_backing_image_name = BACKING_IMAGE_NAME + &#34;-v2&#34;
-        create_backing_image_with_matching_url(
-            client,
-            v2_backing_image_name,
-            BACKING_IMAGE_QCOW2_URL,
-            dataEngine=&#34;v2&#34;)
-
         vol_detached_v2_name = &#34;vol-detached-v2&#34;
         vol_detached_v2 = create_and_check_volume(client, vol_detached_v2_name,
                                                   data_engine=&#34;v2&#34;)
@@ -581,7 +574,7 @@ def test_upgrade(client, core_api, volume_name, csi_pv, # NOQA
     print(&#34;listing available longhorn engine images:&#34;)
     for ei in engineimages:
         print(f&#34;{ei.image}&#34;)
-        if ei.image == longhorn_engine_image:
+        if longhorn_engine_image in ei.image:
             new_ei = ei
 
     for v in volumes:
@@ -650,11 +643,10 @@ def test_upgrade(client, core_api, volume_name, csi_pv, # NOQA
 
     def test_replica_rebuilding(client, volume_name):
         # Delete one healthy replica for vol_rebuild to trigger the rebuilding
-        delete_replica_on_test_node(client, volume_name)
+        replica_name = delete_replica_on_test_node(client, volume_name)
         # Make sure vol_rebuild replica is deleted
-        replica_count = 2
-        vol_rebuild = wait_for_volume_replica_count(client, volume_name,
-                                                    replica_count)
+        vol_rebuild = wait_for_replica_deleted(client, volume_name,
+                                               replica_name)
         # vol_rebuild will become degraded and start replica rebuilding
         # Wait for replica rebuilding to complete
         # Verify the vol_rebuild is still healthy
@@ -711,14 +703,11 @@ def test_upgrade(client, core_api, volume_name, csi_pv, # NOQA
 <p>TODO
 The test will cover both volume has revision counter enabled and
 disabled cases.</p>
-<h2 id="prerequisite">Prerequisite</h2>
-<ul>
-<li>
-<p>Disable Auto Salvage Setting</p>
-</li>
-<li>
-<p>Add block disks</p>
-</li>
+<p>Prerequisite
+-----=
+- Disable Auto Salvage Setting</p>
+<ol>
+<li>Add block disks</li>
 <li>Find the upgrade image tag</li>
 <li>Create a volume, generate and write data into the volume.<ol>
 <li>Create vol_revision_enabled with revision counter enabled case.</li>
@@ -761,7 +750,7 @@ and Delete Pod, and StatefulSet to detach theirvolumes</li>
 <li>Check All volumes data</li>
 <li>Delete one replica for vol_rebuild to trigger the rebuilding</li>
 <li>Verify the vol_rebuild is still healthy</li>
-</ul></div>
+</ol></div>
 </dd>
 <dt id="tests.test_upgrade.test_upgrade_with_auto_upgrade_latest_engine_enabled"><code class="name flex">
 <span>def <span class="ident">test_upgrade_with_auto_upgrade_latest_engine_enabled</span></span>(<span>)</span>

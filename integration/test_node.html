@@ -321,16 +321,12 @@ def reset_disk_settings():
     api = get_longhorn_api_client()
     setting = api.by_id_setting(SETTING_CREATE_DEFAULT_DISK_LABELED_NODES)
     api.update(setting, value=&#34;false&#34;)
-    setting = api.by_id_setting(SETTING_DEFAULT_DATA_PATH)
-    api.update(setting, value=DEFAULT_DISK_PATH)
 
     yield
 
     api = get_longhorn_api_client()
     setting = api.by_id_setting(SETTING_CREATE_DEFAULT_DISK_LABELED_NODES)
-    api.update(setting, value=&#34;false&#34;)
-    setting = api.by_id_setting(SETTING_DEFAULT_DATA_PATH)
-    api.update(setting, value=DEFAULT_DISK_PATH)</code></pre>
+    api.update(setting, value=&#34;false&#34;)</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
@@ -570,7 +566,9 @@ def test_disk_eviction_with_node_level_soft_anti_affinity_disabled(client, # NOQ
                      &#34;diskType&#34;: &#34;block&#34;}
 
     update_disks = get_update_disks(node.disks)
-    update_disks[&#34;test-disk&#34;] = test_disk
+    test_disk_name = &#34;test-disk&#34; + &#39;&#39;.join(
+        choice(ascii_lowercase + digits) for _ in range(6))
+    update_disks[test_disk_name] = test_disk
     node = update_node_disks(client, node.name, disks=update_disks,
                              retry=True)
     node = common.wait_for_disk_update(client, lht_hostId, len(update_disks))
@@ -947,7 +945,8 @@ elsewhere.</li>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_drain_with_block_for_eviction_if_contains_last_replica_success(client, # NOQA
+<pre><code class="python">@pytest.mark.v2_volume_test   # NOQA
+def test_drain_with_block_for_eviction_if_contains_last_replica_success(client, # NOQA
                                                                         core_api, # NOQA
                                                                         make_deployment_with_pvc): # NOQA
     &#34;&#34;&#34;
@@ -990,17 +989,25 @@ elsewhere.</li>
     disk_volume = client.create_volume(name=disk_volume_name,
                                        size=str(2 * Gi),
                                        numberOfReplicas=1,
-                                       dataLocality=&#34;strict-local&#34;)
+                                       dataLocality=&#34;strict-local&#34;,
+                                       dataEngine=DATA_ENGINE)
     disk_volume = wait_for_volume_detached(client, disk_volume_name)
 
     disk_volume.attach(hostId=host_id)
     disk_volume = wait_for_volume_healthy(client, disk_volume_name)
-    disk_path = prepare_host_disk(get_volume_endpoint(disk_volume),
-                                  disk_volume_name)
-    disk = {&#34;path&#34;: disk_path, &#34;allowScheduling&#34;: True}
+    if DATA_ENGINE == &#34;v1&#34;:
+        disk_path = prepare_host_disk(get_volume_endpoint(disk_volume),
+                                      disk_volume_name)
+        disk = {&#34;path&#34;: disk_path, &#34;allowScheduling&#34;: True}
+    else:
+        disk_path = get_volume_endpoint(disk_volume)
+        disk = {&#34;path&#34;: disk_path, &#34;allowScheduling&#34;: True,
+                &#34;diskType&#34;: &#34;block&#34;}
 
     update_disk = get_update_disks(disks)
-    update_disk[&#34;disk1&#34;] = disk
+    disk_name = &#34;test-disk&#34; + &#39;&#39;.join(
+        choice(ascii_lowercase + digits) for _ in range(6))
+    update_disk[disk_name] = disk
 
     node = update_node_disks(client, node.name, disks=update_disk, retry=True)
     node = wait_for_disk_update(client, host_id, len(update_disk))
@@ -1081,7 +1088,13 @@ elsewhere.</li>
     test_data_checksum2 = get_pod_data_md5sum(core_api,
                                               pod2,
                                               data_path)
-    assert checksum2 == test_data_checksum2</code></pre>
+    assert checksum2 == test_data_checksum2
+
+    # cleanup disks
+    if DATA_ENGINE == &#34;v2&#34;:
+        lht_hostId = get_self_host_id()
+        cleanup_selected_disks_on_node(client, lht_hostId,
+                                       disk_name)</code></pre>
 </details>
 <div class="desc"><p>Test drain completes after evicting replicas with node-drain-policy
 block-for-eviction-if-contains-last-replica</p>
@@ -1852,7 +1865,8 @@ def test_node_controller_sync_disk_state(client):  # NOQA
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.mark.coretest   # NOQA
+<pre><code class="python">@pytest.mark.v2_volume_test   # NOQA
+@pytest.mark.coretest   # NOQA
 @pytest.mark.node  # NOQA
 @pytest.mark.mountdisk  # NOQA
 def test_node_controller_sync_storage_available(client):  # NOQA
@@ -1867,7 +1881,11 @@ def test_node_controller_sync_storage_available(client):  # NOQA
     # create a disk to test storageAvailable
     node = client.by_id_node(lht_hostId)
     test_disk_path = create_host_disk(client, &#34;vol-test&#34;, SIZE, lht_hostId)
-    test_disk = {&#34;path&#34;: test_disk_path, &#34;allowScheduling&#34;: True}
+    if DATA_ENGINE == &#34;v1&#34;:
+        test_disk = {&#34;path&#34;: test_disk_path, &#34;allowScheduling&#34;: True}
+    else:
+        test_disk = {&#34;path&#34;: test_disk_path, &#34;allowScheduling&#34;: True,
+                     &#34;diskType&#34;: &#34;block&#34;}
     update_disks = get_update_disks(node.disks)
     update_disks[&#34;test-disk&#34;] = test_disk
     node = update_node_disks(client, node.name, disks=update_disks,
@@ -1875,28 +1893,31 @@ def test_node_controller_sync_storage_available(client):  # NOQA
     node = common.wait_for_disk_update(client, lht_hostId, len(update_disks))
     assert len(node.disks) == len(update_disks)
 
-    # write specified byte data into disk
-    test_file_path = os.path.join(test_disk_path, TEST_FILE)
-    if os.path.exists(test_file_path):
+    if DATA_ENGINE == &#34;v1&#34;:
+        # write specified byte data into disk
+        test_file_path = os.path.join(test_disk_path, TEST_FILE)
+        if os.path.exists(test_file_path):
+            os.remove(test_file_path)
+        cmd = [&#39;dd&#39;, &#39;if=/dev/zero&#39;, &#39;of=&#39; + test_file_path,
+               &#39;bs=1M&#39;, &#39;count=1&#39;]
+        subprocess.check_call(cmd)
+        subprocess.check_call([&#39;sync&#39;, test_file_path])
+        node = client.by_id_node(lht_hostId)
+        disks = node.disks
+        # wait for node controller update disk status
+        expect_disk = {}
+        for fsid, disk in iter(disks.items()):
+            if disk.path == test_disk_path:
+                node = wait_for_disk_storage_available(client, lht_hostId,
+                                                       fsid, test_disk_path)
+                expect_disk = node.disks[fsid]
+                break
+
+        free, total = common.get_host_disk_size(test_disk_path)
+        assert expect_disk.storageAvailable == free
+
         os.remove(test_file_path)
-    cmd = [&#39;dd&#39;, &#39;if=/dev/zero&#39;, &#39;of=&#39; + test_file_path, &#39;bs=1M&#39;, &#39;count=1&#39;]
-    subprocess.check_call(cmd)
-    subprocess.check_call([&#39;sync&#39;, test_file_path])
-    node = client.by_id_node(lht_hostId)
-    disks = node.disks
-    # wait for node controller update disk status
-    expect_disk = {}
-    for fsid, disk in iter(disks.items()):
-        if disk.path == test_disk_path:
-            node = wait_for_disk_storage_available(client, lht_hostId,
-                                                   fsid, test_disk_path)
-            expect_disk = node.disks[fsid]
-            break
 
-    free, total = common.get_host_disk_size(test_disk_path)
-    assert expect_disk.storageAvailable == free
-
-    os.remove(test_file_path)
     # cleanup test disks
     node = client.by_id_node(lht_hostId)
     disks = node.disks
@@ -1921,7 +1942,8 @@ def test_node_controller_sync_storage_available(client):  # NOQA
                              retry=True)
     node = wait_for_disk_update(client, lht_hostId, len(update_disks))
     assert len(node.disks) == len(update_disks)
-    cleanup_host_disks(client, &#39;vol-test&#39;)</code></pre>
+    cleanup_selected_disks_on_node(client, lht_hostId,
+                                   &#39;vol-test&#39;)</code></pre>
 </details>
 <div class="desc"><p>Test node controller sync storage available correctly</p>
 <ol>
@@ -2160,7 +2182,7 @@ And wait for it becoming "Unschedulable".</li>
 </ol></div>
 </dd>
 <dt id="tests.test_node.test_node_default_disk_labeled"><code class="name flex">
-<span>def <span class="ident">test_node_default_disk_labeled</span></span>(<span>client, core_api, random_disk_path, reset_default_disk_label, reset_disk_settings)</span>
+<span>def <span class="ident">test_node_default_disk_labeled</span></span>(<span>client, core_api, reset_default_disk_label, reset_disk_settings)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2169,21 +2191,20 @@ And wait for it becoming "Unschedulable".</li>
 </summary>
 <pre><code class="python">@pytest.mark.v2_volume_test   # NOQA
 @pytest.mark.node  # NOQA
-def test_node_default_disk_labeled(client, core_api, random_disk_path,  reset_default_disk_label,  reset_disk_settings):  # NOQA
+def test_node_default_disk_labeled(client, core_api, reset_default_disk_label,  reset_disk_settings):  # NOQA
     &#34;&#34;&#34;
     Test node feature: create default Disk according to the node label
 
-    Makes sure the created Disk matches the Default Data Path Setting.
+    Makes sure the created Disk is at the Default Data Path.
 
     1. Add labels to node 0 and 1, don&#39;t add label to node 2.
     2. Remove all the disks on node 1 and 2.
         1. The initial default disk will not be recreated.
-    3. Set setting `default disk path` to a random disk path.
-    4. Set setting `create default disk labeled node` to true.
-    5. Check node 0. It should still use the previous default disk path.
+    3. Set setting `create default disk labeled node` to true.
+    4. Check node 0. It should still use the previous default disk path.
         1. Due to we didn&#39;t remove the disk from node 0.
-    6. Check node 1. A new disk should be created at the random disk path.
-    7. Check node 2. There is still no disks
+    5. Check node 1. A new disk should be created at the default disk path.
+    6. Check node 2. There is still no disks
     &#34;&#34;&#34;
     # Set up cases.
     cases = {
@@ -2220,8 +2241,6 @@ def test_node_default_disk_labeled(client, core_api, random_disk_path,  reset_de
     cleanup_node_disks(client, node.id)
 
     # Set disk creation and path Settings.
-    setting = client.by_id_setting(SETTING_DEFAULT_DATA_PATH)
-    client.update(setting, value=random_disk_path)
     setting = client.by_id_setting(SETTING_CREATE_DEFAULT_DISK_LABELED_NODES)
     client.update(setting, value=&#34;true&#34;)
     wait_for_disk_update(client, cases[&#34;labeled&#34;], 1)
@@ -2241,7 +2260,7 @@ def test_node_default_disk_labeled(client, core_api, random_disk_path,  reset_de
     node = client.by_id_node(cases[&#34;labeled&#34;])
     assert len(node.disks) == 1
     assert node.disks[list(node.disks)[0]].path == \
-        random_disk_path
+        DEFAULT_DISK_PATH
 
     # Remove the Disk from the Node used for this test case so we can have the
     # fixtures clean up after.
@@ -2253,20 +2272,19 @@ def test_node_default_disk_labeled(client, core_api, random_disk_path,  reset_de
     assert len(node.disks) == 0</code></pre>
 </details>
 <div class="desc"><p>Test node feature: create default Disk according to the node label</p>
-<p>Makes sure the created Disk matches the Default Data Path Setting.</p>
+<p>Makes sure the created Disk is at the Default Data Path.</p>
 <ol>
 <li>Add labels to node 0 and 1, don't add label to node 2.</li>
 <li>Remove all the disks on node 1 and 2.<ol>
 <li>The initial default disk will not be recreated.</li>
 </ol>
 </li>
-<li>Set setting <code>default disk path</code> to a random disk path.</li>
 <li>Set setting <code>create default disk labeled node</code> to true.</li>
 <li>Check node 0. It should still use the previous default disk path.<ol>
 <li>Due to we didn't remove the disk from node 0.</li>
 </ol>
 </li>
-<li>Check node 1. A new disk should be created at the random disk path.</li>
+<li>Check node 1. A new disk should be created at the default disk path.</li>
 <li>Check node 2. There is still no disks</li>
 </ol></div>
 </dd>

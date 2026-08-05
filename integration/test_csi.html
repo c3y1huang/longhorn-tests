@@ -656,11 +656,11 @@ def test_csi_block_volume_online_expansion(client, core_api, storage_class, pvc,
     expand_and_wait_for_pvc(core_api, pvc, (EXPANDED_VOLUME_SIZE+1)*Gi)
     wait_for_volume_expansion(client, volume_name)
 
-    thread_timeout = 120
+    pod_dev_md5 = None
     try:
-        pod_dev_md5 = future.result(timeout=thread_timeout)
+        pod_dev_md5 = future.result(timeout=RETRY_COUNTS_LONG)
     except TimeoutError:
-        print(&#34;md5 thread exceed timeout ({})s&#34;.format(thread_timeout))
+        print(&#34;md5 thread exceed timeout ({})s&#34;.format(RETRY_COUNTS_LONG))
 
     volume_dev_md5 = subprocess.check_output([&#34;md5sum&#34;, dev_volume])\
                                .strip().decode(&#39;utf-8&#39;).split(&#34; &#34;)[0]
@@ -1122,11 +1122,11 @@ def test_csi_mount_volume_online_expansion(client, core_api, storage_class, pvc,
     expand_and_wait_for_pvc(core_api, pvc, (EXPANDED_VOLUME_SIZE+1)*Gi)
     wait_for_volume_expansion(client, volume_name)
 
-    thread_timeout = 60
+    md5_after_expanding = None
     try:
-        md5_after_expanding = future.result(timeout=thread_timeout)
+        md5_after_expanding = future.result(timeout=RETRY_COUNTS_LONG)
     except TimeoutError:
-        print(&#34;md5 thread exceed timeout ({})s&#34;.format(thread_timeout))
+        print(&#34;md5 thread exceed timeout ({})s&#34;.format(RETRY_COUNTS_LONG))
 
     assert md5_after_expanding == md5_before_expanding</code></pre>
 </details>
@@ -1242,11 +1242,14 @@ def test_csi_storage_capacity(client, storage_class): # NOQA
     &#34;&#34;&#34;
     Test that CSIStorageCapacity objects are properly created
 
-    1. Verify that initially there are no CSIStorageCapacity objects
-    2. Create new storage class with volumeBindingMode set
+    1. Enable the &#39;csi-storage-capacity-tracking&#39; setting
+    2. Verify that initially there are no CSIStorageCapacity objects
+    3. Create new storage class with volumeBindingMode set
        to WaitForFirstConsumer
-    3. Verify that CSIStorageCapacity object is created for each node
+    4. Verify that CSIStorageCapacity object is created for each node
     &#34;&#34;&#34;
+
+    update_setting(client, SETTING_CSI_STORAGE_CAPACITY_TRACKING, &#34;true&#34;)
 
     api = k8sclient.StorageV1Api()
     csi_storage_capacities = api.list_namespaced_csi_storage_capacity(
@@ -1269,6 +1272,7 @@ def test_csi_storage_capacity(client, storage_class): # NOQA
 </details>
 <div class="desc"><p>Test that CSIStorageCapacity objects are properly created</p>
 <ol>
+<li>Enable the 'csi-storage-capacity-tracking' setting</li>
 <li>Verify that initially there are no CSIStorageCapacity objects</li>
 <li>Create new storage class with volumeBindingMode set
 to WaitForFirstConsumer</li>
